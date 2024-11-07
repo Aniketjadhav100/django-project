@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14.3
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+
+  web:
+    build: .
+    command: python /app/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./src:/app
+    ports:
+      - "8000:8000"  # Ensure the app is exposed on port 8000
+    environment:
+      - DJANGO_SETTINGS_MODULE=my_django_project.settings
+    depends_on:
+      - db
+    networks:
+      - my_network
+    restart: always
+
+networks:
+  my_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+
